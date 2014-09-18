@@ -266,7 +266,7 @@ class CrawlerPersister(object):
             if self.tag == self.POST_PARAMS:
                 self.post_params.append([param_name, param_value])
             if self.tag == self.FILE_PARAMS:
-                self.file_params.append([param_name, param_value])
+                self.file_params.append([param_name, [param_value, 'GIF89a', 'image/gif']])
 
     def __end_element(self, name):
         if name == self.RESOURCE:
