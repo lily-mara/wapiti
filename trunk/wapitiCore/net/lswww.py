@@ -804,7 +804,7 @@ class LinkParser(HTMLParser.HTMLParser):
                            'date':           '2011-06-08',
                            'datetime':       '2011-06-09T20:35:34.32',
                            'datetime-local': '2011-06-09T22:41',
-                           'file':           ['pix.gif', 'GIF89a'],
+                           'file':           ['pix.gif', 'GIF89a', 'image/gif'],
                            'hidden':         'default',
                            'email':           'wapiti%40mailinator.com',
                            'month':          '2011-06',
