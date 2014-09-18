@@ -13,9 +13,9 @@ doc_and_conf_files = [(DOC_DIR,
                         "README",
                         "TODO",
                         "VERSION"]), ("share/man/man1",
-                                      ["doc/wapiti.1.gz",
-                                       "doc/wapiti-cookie.1.gz",
-                                       "doc/wapiti-getcookie.1.gz"])]
+                                      ["doc/wapiti.1",
+                                       "doc/wapiti-cookie.1",
+                                       "doc/wapiti-getcookie.1"])]
 
 # Main
 setup(
