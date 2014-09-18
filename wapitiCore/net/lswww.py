@@ -418,7 +418,7 @@ class lswww(object):
                     fname = kv[1][0]
                     if isinstance(fname, unicode):
                         fname = fname.encode(page_encoding, "ignore")
-                    files.append([kv[0], [fname, kv[1][1]]])
+                    files.append([kv[0], [fname, kv[1][1], kv[1][2]]])
                 else:
                     if isinstance(kv[1], unicode):
                         kv[1] = kv[1].encode(page_encoding, "ignore")
