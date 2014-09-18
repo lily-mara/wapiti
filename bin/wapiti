@@ -528,7 +528,7 @@ if __name__ == "__main__":
             wap.setScope(args.scope)
             wap.setVerifySsl(args.check_ssl)
 
-            hostname = url.split("://")[1].split("/")[0]
+            hostname = url.split("://")[1].split("/")[0].replace(":", "_")
 
             if "attack" in args:
                 # Option was used

@@ -701,7 +701,7 @@ class lswww(object):
             print(_(" Note"))
             print("========")
             print(_("This scan has been saved in the file {0}/{1}.xml").format(self.persister.CRAWLER_DATA_DIR,
-                                                                               self.server))
+                self.server.replace(":", "_")))
             print(_("You can use it to perform attacks without scanning again the web site with the \"-k\" parameter"))
         except KeyboardInterrupt:
             self.saveCrawlerData()
@@ -709,7 +709,7 @@ class lswww(object):
             print(_(" Note"))
             print("========")
             print(_("Scan stopped, the data has been saved"
-                    "in the file {0}/{1}.xml").format(self.persister.CRAWLER_DATA_DIR, self.server))
+                "in the file {0}/{1}.xml").format(self.persister.CRAWLER_DATA_DIR, self.server.replace(":", "_")))
             print(_("To continue this scan, you should launch Wapiti with the \"-i\" parameter"))
             pass
 
@@ -783,7 +783,7 @@ class lswww(object):
         self.persister.setLinks(self.browsed_links)
         self.persister.setForms(self.browsed_forms)
         self.persister.setUploads(self.uploads)
-        self.persister.saveXML(os.path.join(self.persister.CRAWLER_DATA_DIR, self.server + '.xml'))
+        self.persister.saveXML(os.path.join(self.persister.CRAWLER_DATA_DIR, self.server.replace(':', '_') + '.xml'))
 
 
 class LinkParser(HTMLParser.HTMLParser):
@@ -1129,85 +1129,3 @@ class LinkParser2(object):
         self.uploads = []
         self.current_form_method = "get"
 
-if __name__ == "__main__":
-    def _(text):
-        return text
-    try:
-        auth = []
-        xmloutput = ""
-        crawlerFile = None
-
-        if len(sys.argv) < 2:
-            print(lswww.__doc__)
-            sys.exit(0)
-        if '-h' in sys.argv or '--help' in sys.argv:
-            print(lswww.__doc__)
-            sys.exit(0)
-        myls = lswww(sys.argv[1])
-        myls.verbosity(1)
-        try:
-            opts, args = getopt.getopt(sys.argv[2:],
-                                       "hp:s:x:c:a:r:v:t:n:e:ib:",
-                                       ["help", "proxy=", "start=", "exclude=", "cookie=", "auth=",
-                                        "remove=", "verbose=", "timeout=", "nice=", "export=", "continue",
-                                        "scope="])
-        except getopt.GetoptError, e:
-            print(e)
-            sys.exit(2)
-        for o, a in opts:
-            if o in ("-h", "--help"):
-                print(lswww.__doc__)
-                sys.exit(0)
-            if o in ("-s", "--start"):
-                if a.startswith("http://") or a.startswith("https://"):
-                    myls.addStartURL(a)
-            if o in ("-x", "--exclude"):
-                if a.startswith("http://") or a.startswith("https://"):
-                    myls.addExcludedURL(a)
-            if o in ("-p", "--proxy"):
-                    myls.setProxy(a)
-            if o in ("-c", "--cookie"):
-                myls.setCookieFile(a)
-            if o in ("-r", "--remove"):
-                myls.addBadParam(a)
-            if o in ("-a", "--auth"):
-                if "%" in a:
-                    auth = [a.split("%")[0], a.split("%")[1]]
-                    myls.setAuthCredentials(auth)
-            if o in ("-v", "--verbose"):
-                if str.isdigit(a):
-                    myls.verbosity(int(a))
-            if o in ("-t", "--timeout"):
-                if str.isdigit(a):
-                    myls.setTimeOut(int(a))
-            if o in ("-n", "--nice"):
-                if str.isdigit(a):
-                    myls.setNice(int(a))
-            if o in ("-e", "--export"):
-                xmloutput = a
-            if o in ("-b", "--scope"):
-                myls.setScope(a)
-            if o in ("-i", "--continue"):
-                crawlerPersister = CrawlerPersister()
-                crawlerFile = os.path.join(crawlerPersister.CRAWLER_DATA_DIR, sys.argv[1].split("://")[1] + '.xml')
-        try:
-            opts, args = getopt.getopt(sys.argv[2:],
-                                       "hp:s:x:c:a:r:v:t:n:e:i:b:",
-                                       ["help", "proxy=", "start=", "exclude=", "cookie=",
-                                        "auth=", "remove=", "verbose=", "timeout=", "nice=",
-                                        "export=", "continue=", "scope="])
-        except getopt.GetoptError, e:
-            print("GetOpt error: {0}".format(e))
-        for o, a in opts:
-            if o in ("-i", "--continue"):
-                if a != '' and a[0] != '-':
-                    crawlerFile = a
-
-        myls.go(crawlerFile)
-        myls.printLinks()
-        myls.printForms()
-        myls.printUploads()
-        if xmloutput != "":
-            myls.exportXML(xmloutput)
-    except SystemExit:
-        pass
