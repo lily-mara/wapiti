@@ -24,7 +24,7 @@ import sys
 
 modules = ["mod_crlf", "mod_exec", "mod_file", "mod_sql", "mod_xss",
            "mod_backup", "mod_htaccess", "mod_blindsql",
-           "mod_permanentxss", "mod_nikto", "mod_delay"]
+           "mod_permanentxss", "mod_nikto", "mod_delay", "mod_buster"]
 
 commons = ["blindsql", "exec", "file", "permanentxss", "sql", "xss"]
 

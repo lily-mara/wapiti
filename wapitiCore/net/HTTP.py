@@ -479,6 +479,11 @@ class HTTPResponse(object):
         received."""
         return self.timestamp
 
+    def getLocation(self):
+        """Return the location header if set or None"""
+        if "location" in self.resp.headers:
+            return self.resp.headers["location"]
+        return None
 
 class HTTP(object):
 
