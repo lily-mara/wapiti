@@ -375,29 +375,28 @@ class lswww(object):
             if lien is not None and page_encoding is not None and isinstance(lien, unicode):
                 lien = lien.encode(page_encoding, "ignore")
             lien = self.correctlink(lien, current, current_full_url, currentdir, proto, page_encoding)
-            if lien is not None:
-                if self.__inzone(lien) == 0:
-                    # Is the document already visited of forbidden ?
-                    lien = HTTP.HTTPResource(lien, encoding=page_encoding, referer=url, link_depth=current_depth+1)
-                    if (lien in self.browsed_links or
-                        lien in self.tobrowse or
-                            self.isExcluded(lien)):
-                        pass
-                    # TODO : check this
-                    elif self.nice > 0:
-                        if self.__countMatches(lien) >= self.nice:
-                            # don't waste time next time we found it
-                            self.excluded.append(lien.url)
-                            return False
-                        else:
-                            self.tobrowse.append(lien)
+            if lien is not None and self.__inzone(lien) == 0:
+            # Is the document already visited of forbidden ?
+            # Keep the encoding of the current webpage for the future requests to the link
+            # so we can encode the query string parameters just as a browser would do.
+            # Of course websites encoding may be broken :(
+                lien = HTTP.HTTPResource(lien, encoding=page_encoding, referer=url, link_depth=current_depth+1)
+                if (lien in self.browsed_links or
+                      lien in self.tobrowse or
+                        self.isExcluded(lien)):
+                    continue
+                # TODO : check this
+                elif self.nice > 0:
+                    if self.__countMatches(lien) >= self.nice:
+                        # don't waste time next time we found it
+                        self.excluded.append(lien.url)
+                        return False
                     else:
-                        # No -> Will browse it soon
                         self.tobrowse.append(lien)
-                    # Keep the encoding of the current webpage for the future requests to the link
-                    # so we can encode the query string parameters just as a browser would do.
-                    # Of course websites encoding may be broken :(
-                    self.link_encoding[lien] = page_encoding
+                else:
+                    # No -> Will browse it soon
+                    self.tobrowse.append(lien)
+            self.link_encoding[lien] = page_encoding
 
         for form in p.forms:
             action = self.correctlink(form[0], current, current_full_url, currentdir, proto, page_encoding)
