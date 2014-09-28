@@ -299,6 +299,7 @@ email
 dk
 de.js
 cgi
+cgi-bin
 altskin.ini
 users
 sv_SE
