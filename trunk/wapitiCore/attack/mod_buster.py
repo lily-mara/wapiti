@@ -76,17 +76,26 @@ class mod_buster(Attack):
             pass
 
     def attack(self, urls, forms):
+        # First we make a list of uniq webdirs and webpages without parameters
         for res in urls:
             path = res.path
             if path.endswith("/"):
                 if path not in self.known_dirs:
                     self.known_dirs.append(path)
             else:
-                self.known_pages.append(path)
+                if path not in self.known_pages:
+                    self.known_pages.append(path)
 
+        # Then for each known webdirs we look for unknown webpages inside
         for current_dir in self.known_dirs:
             self.test_directory(current_dir)
 
-        for current_res in self.new_resources:
+        # Finally, for each discovered webdirs we look for more webpages
+        while self.new_resources:
+            current_res = self.new_resources.pop(0)
             if current_res.endswith("/"):
+                # Mark as known then explore
+                self.known_dirs.append(current_res)
                 self.test_directory(current_res)
+            else:
+                self.known_pages.append(current_res)
