@@ -1,12 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # This file is part of the Wapiti project (http://wapiti.sourceforge.net)
-# Copyright (C) 2009-2014 Nicolas Surribas
-#
-# Original authors :
-# Anthony DUBOCAGE
-# Guillaume TRANCHANT
-# Gregory FONTAINE
+# Copyright (C) 2014 Nicolas Surribas
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
