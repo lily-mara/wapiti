@@ -526,7 +526,7 @@ if __name__ == "__main__":
                 raise InvalidOptionValue("-f", args.format)
 
             wap.setScope(args.scope)
-            wap.setVerifySsl(args.check_ssl)
+            wap.setVerifySsl(bool(args.check_ssl))
 
             hostname = url.split("://")[1].split("/")[0].replace(":", "_")
 
