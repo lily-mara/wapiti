@@ -90,26 +90,26 @@ class Wapiti(object):
             if self.report_generator_type.lower() == rep_gen_info.getKey():
                 self.report_gen = rep_gen_info.createInstance()
                 self.report_gen.setReportInfo(target=self.target_url,
-                                             scope=self.target_scope,
-                                             date_string=time.strftime("%a, %d %b %Y %H:%M:%S +0000", time.gmtime()),
-                                             version=WAPITI_VERSION)
+                                              scope=self.target_scope,
+                                              date_string=time.strftime("%a, %d %b %Y %H:%M:%S +0000", time.gmtime()),
+                                              version=WAPITI_VERSION)
                 break
 
         vuln_xml_parser = VulnerabilityXMLParser()
         vuln_xml_parser.parse(os.path.join(CONF_DIR, "config", "vulnerabilities", "vulnerabilities.xml"))
         for vul in vuln_xml_parser.getVulnerabilities():
             self.report_gen.addVulnerabilityType(_(vul.getName()),
-                                                _(vul.getDescription()),
-                                                _(vul.getSolution()),
-                                                vul.getReferences())
+                                                 _(vul.getDescription()),
+                                                 _(vul.getSolution()),
+                                                 vul.getReferences())
 
         anom_xml_parser = AnomalyXMLParser()
         anom_xml_parser.parse(os.path.join(CONF_DIR, "config", "vulnerabilities", "anomalies.xml"))
         for anomaly in anom_xml_parser.getAnomalies():
             self.report_gen.addAnomalyType(_(anomaly.getName()),
-                                          (anomaly.getDescription()),
-                                          _(anomaly.getSolution()),
-                                          anomaly.getReferences())
+                                           (anomaly.getDescription()),
+                                           _(anomaly.getSolution()),
+                                           anomaly.getReferences())
 
     def __initAttacks(self):
         self.__initReport()
@@ -244,7 +244,7 @@ class Wapiti(object):
                     self.output_file = self.REPORT_FILE + ".txt"
                 else:
                     self.output_file = self.REPORT_FILE + ".xml"
-        self.report_gen.generateReport(self.output_file)
+        self.report_gen.generate_report(self.output_file)
         print('')
         print(_("Report"))
         print("------")
@@ -267,13 +267,13 @@ class Wapiti(object):
         """Set a proxy to use for HTTP requests."""
         self.http_engine.setProxy(proxy)
 
-    def addStartURL(self, url):
+    def addStartURL(self, start_url):
         """Specify an URL to start the scan with. Can be called several times."""
-        self.myls.addStartURL(url)
+        self.myls.addStartURL(start_url)
 
-    def addExcludedURL(self, url):
+    def addExcludedURL(self, exclude_url):
         """Specify an URL to exclude from the scan. Can be called several times."""
-        self.myls.addExcludedURL(url)
+        self.myls.addExcludedURL(exclude_url)
 
     def setCookieFile(self, cookie):
         """Load session data from a cookie file"""
@@ -287,10 +287,10 @@ class Wapiti(object):
         """Set the authentication method to use."""
         self.http_engine.setAuthMethod(auth_method)
 
-    def addBadParam(self, bad_param):
+    def addBadParam(self, param_name):
         """Exclude a parameter from an url (urls with this parameter will be
         modified. This function can be call several times"""
-        self.myls.addBadParam(bad_param)
+        self.myls.addBadParam(param_name)
 
     def setNice(self, nice):
         """Define how many tuples of parameters / values must be sent for a
@@ -417,7 +417,7 @@ if __name__ == "__main__":
         parser.add_argument('-v', '--verbose',
                             metavar='LEVEL', dest='verbosity',
                             help='Set verbosity level', default=0,
-                            type=int, choices=xrange(0,3))
+                            type=int, choices=xrange(0, 3))
         parser.add_argument('-b', '--scope',
                             help='Set scan scope', default="folder",
                             choices=['page', 'folder', 'domain', 'url'])
@@ -551,7 +551,6 @@ if __name__ == "__main__":
         except InvalidOptionValue, msg:
             print(msg)
             sys.exit(2)
-
 
         if attackFile is not None:
             if crawlerPersister.isDataForUrl(attackFile) == 1:

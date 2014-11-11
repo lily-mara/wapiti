@@ -51,7 +51,6 @@ class XMLReportGenerator(ReportGenerator):
     </report>
     """
 
-
     def __init__(self):
         self.__infos = {}
         self.__xmlDoc = Document()
@@ -139,7 +138,7 @@ class XMLReportGenerator(ReportGenerator):
             self.__anomalies[category] = []
         self.__anomalies[category].append(anom_dict)
 
-    def generateReport(self, filename):
+    def generate_report(self, filename):
         """
         Create a xml file with a report of the vulnerabilities which have been logged with
         the method logVulnerability(vulnerabilityTypeName,level,url,parameter,info)

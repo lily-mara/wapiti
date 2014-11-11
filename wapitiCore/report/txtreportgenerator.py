@@ -53,7 +53,7 @@ class TXTReportGenerator(ReportGenerator):
         if scope:
             self.__infos["scope"] = scope
 
-    def generateReport(self, filename):
+    def generate_report(self, filename):
         """
         Create a TXT file encoded as UTF-8 with a report of the vulnerabilities which have been logged with
         the methods logVulnerability and logAnomaly.

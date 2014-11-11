@@ -142,7 +142,7 @@ class OpenVASReportGenerator(ReportGenerator):
         self.__anomalies[category].append(anom_dict)
         self.__anomCount += 1
 
-    def generateReport(self, filename):
+    def generate_report(self, filename):
         """
         Create a xml file with a report of the vulnerabilities which have been logged with
         the method logVulnerability(vulnerabilityTypeName,level,url,parameter,info)

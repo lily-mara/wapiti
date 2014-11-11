@@ -59,8 +59,6 @@ class CrawlerPersister(object):
     POST_PARAMS = "post_params"
     FILE_PARAMS = "file_params"
 
-
-
     def __init__(self):
         # toBrowse can contain GET and POST resources
         self.to_browse = []
@@ -83,6 +81,8 @@ class CrawlerPersister(object):
         self.post_params = []
         self.file_params = []
 
+        self._parser = expat.ParserCreate("UTF-8")
+
     @staticmethod
     def isDataForUrl(filename):
         return os.path.exists(filename)
@@ -96,107 +96,107 @@ class CrawlerPersister(object):
         root = xml.createElement("root")
         xml.appendChild(root)
 
-        rootUrlEl = xml.createElement(self.ROOT_URL)
-        rootUrlEl.appendChild(xml.createTextNode(self.root_url.url))
-        root.appendChild(rootUrlEl)
+        root_url_element = xml.createElement(self.ROOT_URL)
+        root_url_element.appendChild(xml.createTextNode(self.root_url.url))
+        root.appendChild(root_url_element)
 
         # 1 - URLs and FORMs not yet browsed
         # we don't know several informations yet like the response headers
-        toBrowseEl = xml.createElement(self.TO_BROWSE)
+        to_browse_element = xml.createElement(self.TO_BROWSE)
         for http_resource in self.to_browse:
             # <resource method="" path="" encoding ="">
-            resEl = xml.createElement(self.RESOURCE)
-            resEl.setAttribute(self.METHOD, http_resource.method)
-            resEl.setAttribute(self.PATH, http_resource.path)
-            resEl.setAttribute(self.ENCODING, http_resource.encoding)
+            resource_element = xml.createElement(self.RESOURCE)
+            resource_element.setAttribute(self.METHOD, http_resource.method)
+            resource_element.setAttribute(self.PATH, http_resource.path)
+            resource_element.setAttribute(self.ENCODING, http_resource.encoding)
             #   <referer>
-            refererEl = xml.createElement(self.REFERER)
-            refererEl.appendChild(xml.createTextNode(http_resource.referer))
-            resEl.appendChild(refererEl)
+            referer_element = xml.createElement(self.REFERER)
+            referer_element.appendChild(xml.createTextNode(http_resource.referer))
+            resource_element.appendChild(referer_element)
             #   <get_params>
-            getParamsEl = xml.createElement(self.GET_PARAMS)
+            get_params_element = xml.createElement(self.GET_PARAMS)
             for k, v in http_resource.get_params:
-                inputEl = xml.createElement(self.INPUT)
-                inputEl.setAttribute(self.INPUT_NAME, quote(k))
+                input_element = xml.createElement(self.INPUT)
+                input_element.setAttribute(self.INPUT_NAME, quote(k))
                 if v is not None:
-                    inputEl.setAttribute(self.INPUT_VALUE, quote(v))
-                getParamsEl.appendChild(inputEl)
-            resEl.appendChild(getParamsEl)
+                    input_element.setAttribute(self.INPUT_VALUE, quote(v))
+                get_params_element.appendChild(input_element)
+            resource_element.appendChild(get_params_element)
 
             #   <post_params>
-            postParamsEl = xml.createElement(self.POST_PARAMS)
+            post_params_element = xml.createElement(self.POST_PARAMS)
             for k, v in http_resource.post_params:
-                inputEl = xml.createElement(self.INPUT)
-                inputEl.setAttribute(self.INPUT_NAME, quote(k))
-                inputEl.setAttribute(self.INPUT_VALUE, quote(v))
-                postParamsEl.appendChild(inputEl)
-            resEl.appendChild(postParamsEl)
+                input_element = xml.createElement(self.INPUT)
+                input_element.setAttribute(self.INPUT_NAME, quote(k))
+                input_element.setAttribute(self.INPUT_VALUE, quote(v))
+                post_params_element.appendChild(input_element)
+            resource_element.appendChild(post_params_element)
 
             #   <file_params>
-            fileParamsEl = xml.createElement(self.FILE_PARAMS)
+            file_params_element = xml.createElement(self.FILE_PARAMS)
             for k, v in http_resource.file_params:
-                inputEl = xml.createElement(self.INPUT)
-                inputEl.setAttribute(self.INPUT_NAME, quote(k))
-                inputEl.setAttribute(self.INPUT_VALUE, quote(v))
-                fileParamsEl.appendChild(inputEl)
-            resEl.appendChild(fileParamsEl)
+                input_element = xml.createElement(self.INPUT)
+                input_element.setAttribute(self.INPUT_NAME, quote(k))
+                input_element.setAttribute(self.INPUT_VALUE, quote(v))
+                file_params_element.appendChild(input_element)
+            resource_element.appendChild(file_params_element)
 
-            toBrowseEl.appendChild(resEl)
-        root.appendChild(toBrowseEl)
+            to_browse_element.appendChild(resource_element)
+        root.appendChild(to_browse_element)
 
         # 2 - URLs and FORMs already browsed
-        browsedEl = xml.createElement(self.BROWSED)
+        browsed_element = xml.createElement(self.BROWSED)
         for http_resource in self.browsed_links + self.browsed_forms:
             # <resource method="" path="" encoding ="">
-            resEl = xml.createElement(self.RESOURCE)
-            resEl.setAttribute(self.METHOD, http_resource.method)
-            resEl.setAttribute(self.PATH, http_resource.path)
-            resEl.setAttribute(self.ENCODING, http_resource.encoding)
+            resource_element = xml.createElement(self.RESOURCE)
+            resource_element.setAttribute(self.METHOD, http_resource.method)
+            resource_element.setAttribute(self.PATH, http_resource.path)
+            resource_element.setAttribute(self.ENCODING, http_resource.encoding)
             #   <referer>
-            refererEl = xml.createElement(self.REFERER)
-            refererEl.appendChild(xml.createTextNode(http_resource.referer))
-            resEl.appendChild(refererEl)
+            referer_element = xml.createElement(self.REFERER)
+            referer_element.appendChild(xml.createTextNode(http_resource.referer))
+            resource_element.appendChild(referer_element)
             #   <get_params>
-            getParamsEl = xml.createElement(self.GET_PARAMS)
+            get_params_element = xml.createElement(self.GET_PARAMS)
             for k, v in http_resource.get_params:
-                inputEl = xml.createElement(self.INPUT)
-                inputEl.setAttribute(self.INPUT_NAME, quote(k))
+                input_element = xml.createElement(self.INPUT)
+                input_element.setAttribute(self.INPUT_NAME, quote(k))
                 if v is not None:
-                    inputEl.setAttribute(self.INPUT_VALUE, quote(v))
-                getParamsEl.appendChild(inputEl)
-            resEl.appendChild(getParamsEl)
+                    input_element.setAttribute(self.INPUT_VALUE, quote(v))
+                get_params_element.appendChild(input_element)
+            resource_element.appendChild(get_params_element)
 
             #   <post_params>
-            postParamsEl = xml.createElement(self.POST_PARAMS)
+            post_params_element = xml.createElement(self.POST_PARAMS)
             for k, v in http_resource.post_params:
-                inputEl = xml.createElement(self.INPUT)
-                inputEl.setAttribute(self.INPUT_NAME, quote(k))
-                inputEl.setAttribute(self.INPUT_VALUE, quote(v))
-                postParamsEl.appendChild(inputEl)
-            resEl.appendChild(postParamsEl)
+                input_element = xml.createElement(self.INPUT)
+                input_element.setAttribute(self.INPUT_NAME, quote(k))
+                input_element.setAttribute(self.INPUT_VALUE, quote(v))
+                post_params_element.appendChild(input_element)
+            resource_element.appendChild(post_params_element)
 
             #   <file_params>
-            fileParamsEl = xml.createElement(self.FILE_PARAMS)
+            file_params_element = xml.createElement(self.FILE_PARAMS)
             for k, v in http_resource.file_params:
-                inputEl = xml.createElement(self.INPUT)
-                inputEl.setAttribute(self.INPUT_NAME, quote(k))
-                inputEl.setAttribute(self.INPUT_VALUE, quote(v[0]))
-                fileParamsEl.appendChild(inputEl)
-            resEl.appendChild(fileParamsEl)
+                input_element = xml.createElement(self.INPUT)
+                input_element.setAttribute(self.INPUT_NAME, quote(k))
+                input_element.setAttribute(self.INPUT_VALUE, quote(v[0]))
+                file_params_element.appendChild(input_element)
+            resource_element.appendChild(file_params_element)
 
             #   <headers>
-            headersEl = xml.createElement(self.HEADERS)
+            headers_element = xml.createElement(self.HEADERS)
             for k, v in http_resource.headers.items():
                 if v is None:
                     v = ""
-                headEl = xml.createElement(self.HEADER)
-                headEl.setAttribute(self.HEADER_NAME, k)
-                headEl.setAttribute(self.HEADER_VALUE, v)
-                headersEl.appendChild(headEl)
-            resEl.appendChild(headersEl)
+                header_element = xml.createElement(self.HEADER)
+                header_element.setAttribute(self.HEADER_NAME, k)
+                header_element.setAttribute(self.HEADER_VALUE, v)
+                headers_element.appendChild(header_element)
+            resource_element.appendChild(headers_element)
 
-            browsedEl.appendChild(resEl)
-        root.appendChild(browsedEl)
+            browsed_element.appendChild(resource_element)
+        root.appendChild(browsed_element)
 
         f = open(filename, "w")
         try:
@@ -209,7 +209,6 @@ class CrawlerPersister(object):
         Loads the crawler parameters from an XML file.
         @param filename The file from where is loaded the crawler data
         """
-        self._parser = expat.ParserCreate("UTF-8")
         self._parser.StartElementHandler = self.__start_element
         self._parser.EndElementHandler = self.__end_element
         self._parser.CharacterDataHandler = self.__char_data

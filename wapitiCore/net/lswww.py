@@ -20,7 +20,6 @@
 import sys
 import re
 import socket
-import getopt
 import os
 import HTMLParser
 import urllib
@@ -29,6 +28,8 @@ import requests
 from htmlentitydefs import name2codepoint as n2cp
 from xml.dom import minidom
 from bs4 import BeautifulSoup
+from random import choice
+from string import ascii_letters
 
 from wapitiCore.net import jsoncookie
 from wapitiCore.net import HTTP
@@ -39,68 +40,7 @@ from wapitiCore.net.crawlerpersister import CrawlerPersister
 
 class lswww(object):
     """
-    lswww explore a website and extract links and forms fields.
-
-    Usage: python lswww.py http://server.com/base/url/ [options]
-
-    Supported options are:
-        -s <url>
-        --start <url>
-            To specify an url to start with
-
-        -x <url>
-        --exclude <url>
-            To exclude an url from the scan (for example logout scripts)
-            You can also use a wildcard (*)
-            Example : -x "http://server/base/?page=*&module=test"
-            or -x http://server/base/admin/* to exclude a directory
-
-        -p <url_proxy>
-        --proxy <url_proxy>
-            To specify a proxy
-            Example: -p http://proxy:port/
-
-        -c <cookie_file>
-        --cookie <cookie_file>
-            To use a cookie
-
-        -a <login%password>
-        --auth <login%password>
-            Set credentials for HTTP authentication
-            Doesn't work with Python 2.4
-
-        -r <parameter_name>
-        --remove <parameter_name>
-            Remove a parameter from URLs
-
-        -v <level>
-        --verbose <level>
-            Set verbosity level
-            0: only print results
-            1: print a dot for each url found (default)
-            2: print each url
-
-        -t <timeout>
-        --timeout <timeout>
-            Set the timeout (in seconds)
-
-        -n <limit>
-        --nice <limit>
-            Define a limit of urls to read with the same pattern
-            Use this option to prevent endless loops
-            Must be greater than 0
-
-        -i <file>
-        --continue <file>
-            This parameter indicates Wapiti to continue with the scan
-            from the specified file, this file should contain data
-            from a previous scan.
-            The file is optional, if it is not specified, Wapiti takes
-            the default file from \"scans\" folder.
-
-        -h
-        --help
-            To print this usage message
+    lswww module is used to explore a website and extract links and forms fields.
     """
 
     SCOPE_DOMAIN = "domain"
@@ -142,6 +82,8 @@ class lswww(object):
         self.cookiejar = None
         self.scope = "folder"
         self.link_encoding = {}
+        self.custom_404 = {}
+        self.invalid_page = "zqxj{0}.html".format("".join([choice(ascii_letters) for __ in xrange(0, 10)]))
 
         # 0 means no limits
         self.nice = 0
@@ -214,7 +156,8 @@ class lswww(object):
 
     def browse(self, web_resource):
         """Extract urls from a webpage and add them to the list of urls
-        to browse if they aren't in the exclusion list"""
+        to browse if they aren't in the exclusion list.
+        Returns True if the URL is kept for attacks."""
 
         # We are going too much deep, don't browse this link
         if web_resource.link_depth > self.max_link_depth:
@@ -227,12 +170,22 @@ class lswww(object):
         # Url without query string
         current = current_full_url.split("?")[0]
         # Get the dirname of the file
-        currentdir = "/".join(current.split("/")[:-1]) + "/"
+        currentdir = web_resource.dir_name
+        parrentdir = web_resource.parent_dir
 
         # Timeout must not be too long to block big documents
         # (for example a download script)
         # and not too short to give good results
         socket.setdefaulttimeout(self.timeout)
+
+        if parrentdir not in self.custom_404:
+            invalid_res = HTTP.HTTPResource(parrentdir + self.invalid_page)
+            try:
+                invalid_resp = self.h.send(invalid_res)
+                invalid_code = invalid_resp.getCode()
+                self.custom_404[parrentdir] = invalid_code
+            except socket.error:
+                pass
 
         try:
             resp = self.h.send(web_resource)
@@ -326,6 +279,10 @@ class lswww(object):
                             not self.isExcluded(redir)):
                         self.tobrowse.append(redir)
 
+        if not web_resource.is_root and self.custom_404.get(parrentdir, "404") == code:
+            self.excluded.append(url)
+            return False
+
         html_source = data
         bs = BeautifulSoup(html_source)
         # Look for a base tag with an href attribute
@@ -382,7 +339,7 @@ class lswww(object):
             # Of course websites encoding may be broken :(
                 lien = HTTP.HTTPResource(lien, encoding=page_encoding, referer=url, link_depth=current_depth+1)
                 if (lien in self.browsed_links or
-                      lien in self.tobrowse or
+                    lien in self.tobrowse or
                         self.isExcluded(lien)):
                     continue
                 # TODO : check this
@@ -437,10 +394,11 @@ class lswww(object):
             if files:
                 if form_rsrc not in self.uploads:
                     self.uploads.append(form_rsrc)
+
         # We automatically exclude 404 urls
-        if code == "404":
-            self.excluded.append(url)
-            #return {} # exclude from scan but can be useful for some modules maybe
+        #if code == "404":
+        #    self.excluded.append(url)
+        #    #return {} # exclude from scan but can be useful for some modules maybe
 
         return True
 
@@ -700,7 +658,7 @@ class lswww(object):
             print(_(" Note"))
             print("========")
             print(_("This scan has been saved in the file {0}/{1}.xml").format(self.persister.CRAWLER_DATA_DIR,
-                self.server.replace(":", "_")))
+                  self.server.replace(":", "_")))
             print(_("You can use it to perform attacks without scanning again the web site with the \"-k\" parameter"))
         except KeyboardInterrupt:
             self.saveCrawlerData()
@@ -708,7 +666,7 @@ class lswww(object):
             print(_(" Note"))
             print("========")
             print(_("Scan stopped, the data has been saved"
-                "in the file {0}/{1}.xml").format(self.persister.CRAWLER_DATA_DIR, self.server.replace(":", "_")))
+                  "in the file {0}/{1}.xml").format(self.persister.CRAWLER_DATA_DIR, self.server.replace(":", "_")))
             print(_("To continue this scan, you should launch Wapiti with the \"-i\" parameter"))
             pass
 
@@ -809,7 +767,7 @@ class LinkParser(HTMLParser.HTMLParser):
                            'month':          '2011-06',
                            'number':         '1337',
                            'password':       'letmein',
-                           'radio':          'beton', # priv8 j0k3
+                           'radio':          'beton',  # priv8 j0k3
                            'range':          '37',
                            'search':         'default',
                            'submit':         'submit',
