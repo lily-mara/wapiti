@@ -42,7 +42,7 @@ class HTMLReportGenerator(JSONReportGenerator):
     REPORT_DIR = "report_template"
     REPORT_JSON_FILE = "vulnerabilities.json"
 
-    def generateReport(self, filename):
+    def generate_report(self, filename):
         """
         Copy the report structure in the specified 'fileName' directory
         If these path exists, it will be overwritten
@@ -51,7 +51,7 @@ class HTMLReportGenerator(JSONReportGenerator):
             rmtree(filename)
         copytree(os.path.join(self.BASE_DIR, self.REPORT_DIR), filename)
 
-        JSONReportGenerator.generateReport(self, os.path.join(filename, self.REPORT_JSON_FILE))
+        JSONReportGenerator.generate_report(self, os.path.join(filename, self.REPORT_JSON_FILE))
         fd = open(os.path.join(filename, self.REPORT_JSON_FILE))
         json_data = fd.read()
         json_data = json_data.replace('</', r'<\/')
@@ -90,7 +90,7 @@ if __name__ == "__main__":
 #        xmlGen.logVulnerability("Cross Site Scripting", "1", "url8", "parameter8", "info8")
 #        xmlGen.logVulnerability("Google Hacking", "2", "url9", "parameter9", "info9")
 #        """xmlGen.printToFile("sampleReport.xml")"""
-#	xmlGen.generateReport("hola")
+#	xmlGen.generate_report("hola")
 #
 #    except SystemExit:
 #        pass

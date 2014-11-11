@@ -20,6 +20,7 @@ import urllib
 import urlparse
 import socket
 import os
+import posixpath
 import cgi
 import requests
 import datetime
@@ -310,12 +311,31 @@ class HTTPResource(object):
         return self._file_path
 
     @property
+    def is_root(self):
+        return True if self._file_path == "/" else False
+
+    @property
     def file_ext(self):
-        return os.path.splitext(self.file_path)[1]
+        return posixpath.splitext(self._file_path)[1]
 
     @property
     def file_name(self):
-        return os.path.basename(self.file_path)
+        return posixpath.basename(self._file_path)
+
+    @property
+    def dir_name(self):
+        if self.file_name:
+            return posixpath.dirname(self._resource_path) + "/"
+        return self._resource_path
+
+    @property
+    def parent_dir(self):
+        if self.file_name:
+            return posixpath.dirname(self._resource_path) + "/"
+        elif self.is_root:
+            return self._resource_path
+        else:
+            return posixpath.dirname(posixpath.dirname(self._resource_path)) + "/"
 
     @property
     def method(self):
@@ -421,6 +441,7 @@ class HTTPResource(object):
     def size(self):
         return self._size
 
+
 class HTTPResponse(object):
     resp = None
 
@@ -441,7 +462,7 @@ class HTTPResponse(object):
         return self.resp.content
 
     def getCode(self):
-        """Return the HTTP Response code ."""
+        """Return the HTTP Response code as a string."""
         return str(self.resp.status_code)
 
     def getHeaders(self):
@@ -485,6 +506,7 @@ class HTTPResponse(object):
             return self.resp.headers["location"]
         return None
 
+
 class HTTP(object):
 
     def __init__(self, server):
@@ -504,12 +526,13 @@ class HTTP(object):
 
         self.configured = 0
 
-    def send(self, target, headers={},
+    def send(self, target, headers=None,
              get_params=None, post_params=None, file_params=None):
         """Send a HTTP Request. GET or POST (if post_params is set)."""
         resp = None
         _headers = self.base_headers.copy()
-        _headers.update(headers)
+        if isinstance(headers, dict):
+            _headers.update(headers)
 
         get_data = None
         if isinstance(get_params, basestring):
@@ -688,6 +711,10 @@ if __name__ == "__main__":
     res12 = HTTPResource("http://httpbin.org/post?qs1",
                          post_params=[['post1', 'c'], ['post2', 'd']],
                          file_params=[['file1', ['fname1', 'content']], ['file2', ['fname2', 'content']]])
+    res13 = HTTPResource("https://www.youtube.com/user/OneMinuteSilenceBand/videos")
+    res14 = HTTPResource("https://www.youtube.com/user/OneMinuteSilenceBand/")
+    res15 = HTTPResource("https://duckduckgo.com/")
+
     assert res1 < res2
     assert res2 > res3
     assert res1 < res3
@@ -695,6 +722,13 @@ if __name__ == "__main__":
     assert res1 != res2
     assert res2 >= res1
     assert res1 <= res3
+    assert res13.file_name == "videos"
+    assert res13.parent_dir == res14.url
+    assert res15.is_root
+    assert res15.parent_dir == res15.url
+    assert res13.dir_name == res14.url
+    assert res14.dir_name == res14.url
+    assert res15.dir_name == res15.url
     print "=== Basic representation follows ==="
     print res1
     print "=== cURL representation follows ==="

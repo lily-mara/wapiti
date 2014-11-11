@@ -50,7 +50,7 @@ class mod_shellshock(Attack):
             "user-agent": empty_func + cmd,
             "referer": empty_func + cmd,
             "cookie": empty_func + cmd
-            }
+        }
 
     def attackGET(self, http_res):
         url = http_res.path

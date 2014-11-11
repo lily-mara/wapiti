@@ -76,7 +76,7 @@ class mod_permanentxss(Attack):
             try:
                 resp = self.HTTP.send(target_req, headers=headers)
                 data = resp.getPage()
-            except requests.exceptions.Timeout, timeout:
+            except requests.exceptions.Timeout:
                 data = ""
             except socket.error, se:
                 data = ""

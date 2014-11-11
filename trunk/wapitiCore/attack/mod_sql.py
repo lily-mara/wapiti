@@ -235,7 +235,7 @@ class mod_sql(Attack):
                     try:
                         resp = self.HTTP.send(evil_req)
                         data, code = resp.getPageCode()
-                    except requests.exceptions.Timeout, timeout:
+                    except requests.exceptions.Timeout:
                         # No timeout report here... launch blind sql detection later
                         code = "408"
                     else:

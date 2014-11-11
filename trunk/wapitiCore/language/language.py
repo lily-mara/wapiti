@@ -53,8 +53,8 @@ class Language(object):
         """
         if lang is None:
             # if lang is not specified, default language is used
-            defLocale = locale.getdefaultlocale()
-            langCounty = defLocale[0]   # en_UK
+            def_locale = locale.getdefaultlocale()
+            langCounty = def_locale[0]   # en_UK
             if not langCounty is None:
                 lang = langCounty[:2]  # en
 

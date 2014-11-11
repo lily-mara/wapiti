@@ -50,7 +50,7 @@ class JSONReportGenerator(ReportGenerator):
         if scope:
             self.__infos["scope"] = scope
 
-    def generateReport(self, filename):
+    def generate_report(self, filename):
         """
         Generate a JSON report of the vulnerabilities and anomalies which have
         been previously logged with the log* methods.

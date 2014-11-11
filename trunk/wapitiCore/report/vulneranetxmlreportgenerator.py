@@ -89,48 +89,48 @@ class VulneraNetXMLReportGenerator(ReportGenerator):
         and if there is no vulnerability of a type, this type will not be presented
         in the report
         """
-        vulnerabilityType = self.__xmlDoc.createElement("VulnerabilityType")
-        vulnerabilityType.appendChild(self.__xmlDoc.createElement("VulnerabilityList"))
+        vulnerability_type = self.__xmlDoc.createElement("VulnerabilityType")
+        vulnerability_type.appendChild(self.__xmlDoc.createElement("VulnerabilityList"))
 
-        vulTitleNode = self.__xmlDoc.createElement("Title")
-        vulTitleNode.appendChild(self.__xmlDoc.createTextNode(name))
-        vulnerabilityType.appendChild(vulTitleNode)
+        vuln_title_node = self.__xmlDoc.createElement("Title")
+        vuln_title_node.appendChild(self.__xmlDoc.createTextNode(name))
+        vulnerability_type.appendChild(vuln_title_node)
 
-        self.__addToVulnerabilityTypeList(vulnerabilityType)
+        self.__addToVulnerabilityTypeList(vulnerability_type)
         if description != "":
-            descriptionNode = self.__xmlDoc.createElement("Description")
-            descriptionNode.appendChild(self.__xmlDoc.createCDATASection(description))
-            vulnerabilityType.appendChild(descriptionNode)
+            description_node = self.__xmlDoc.createElement("Description")
+            description_node.appendChild(self.__xmlDoc.createCDATASection(description))
+            vulnerability_type.appendChild(description_node)
         if solution != "":
-            solutionNode = self.__xmlDoc.createElement("Solution")
-            solutionNode.appendChild(self.__xmlDoc.createCDATASection(solution))
-            vulnerabilityType.appendChild(solutionNode)
+            solution_node = self.__xmlDoc.createElement("Solution")
+            solution_node.appendChild(self.__xmlDoc.createCDATASection(solution))
+            vulnerability_type.appendChild(solution_node)
         if references != "":
-            referencesNode = self.__xmlDoc.createElement("References")
+            references_node = self.__xmlDoc.createElement("References")
             for ref in references:
-                referenceNode = self.__xmlDoc.createElement("Reference")
-                nameNode = self.__xmlDoc.createElement("name")
-                urlNode = self.__xmlDoc.createElement("url")
-                nameNode.appendChild(self.__xmlDoc.createTextNode(ref))
-                urlNode.appendChild(self.__xmlDoc.createTextNode(references[ref]))
-                referenceNode.appendChild(nameNode)
-                referenceNode.appendChild(urlNode)
-                referencesNode.appendChild(referenceNode)
-            vulnerabilityType.appendChild(referencesNode)
-        return vulnerabilityType
+                reference_node = self.__xmlDoc.createElement("Reference")
+                name_node = self.__xmlDoc.createElement("name")
+                url_node = self.__xmlDoc.createElement("url")
+                name_node.appendChild(self.__xmlDoc.createTextNode(ref))
+                url_node.appendChild(self.__xmlDoc.createTextNode(references[ref]))
+                reference_node.appendChild(name_node)
+                reference_node.appendChild(url_node)
+                references_node.appendChild(reference_node)
+            vulnerability_type.appendChild(references_node)
+        return vulnerability_type
 
     def __addToVulnerabilityList(self, category, vulnerability):
-        vulnerabilityType = None
+        vulnerability_type = None
         for node in self.__vulnerabilityTypeList.childNodes:
-            titleNode = node.getElementsByTagName("Title")
-            if (titleNode.length >= 1 and
-                titleNode[0].childNodes.length == 1 and
-                    titleNode[0].childNodes[0].wholeText == category):
-                vulnerabilityType = node
+            title_node = node.getElementsByTagName("Title")
+            if (title_node.length >= 1 and
+                title_node[0].childNodes.length == 1 and
+                    title_node[0].childNodes[0].wholeText == category):
+                vulnerability_type = node
                 break
-        if vulnerabilityType is None:
-            vulnerabilityType = self.addVulnerabilityType(category)
-        vulnerabilityType.childNodes[0].appendChild(vulnerability)
+        if vulnerability_type is None:
+            vulnerability_type = self.addVulnerabilityType(category)
+        vulnerability_type.childNodes[0].appendChild(vulnerability)
 
     def logVulnerability(self,
                          category=None,
@@ -149,58 +149,58 @@ class VulneraNetXMLReportGenerator(ReportGenerator):
         vulnerability = self.__xmlDoc.createElement("Vulnerability")
 
         if level == 1:
-            stLevel = "Low"
+            st_level = "Low"
         elif level == 2:
-            stLevel = "Moderate"
+            st_level = "Moderate"
         else:
-            stLevel = "Important"
+            st_level = "Important"
 
-        levelNode = self.__xmlDoc.createElement("Severity")
-        levelNode.appendChild(self.__xmlDoc.createTextNode(stLevel))
-        vulnerability.appendChild(levelNode)
+        level_node = self.__xmlDoc.createElement("Severity")
+        level_node.appendChild(self.__xmlDoc.createTextNode(st_level))
+        vulnerability.appendChild(level_node)
 
-        tsNode = self.__xmlDoc.createElement("DetectionDate")
+        ts_node = self.__xmlDoc.createElement("DetectionDate")
         #tsNode.appendChild(self.__xmlDoc.createTextNode(ts.isoformat()))
-        vulnerability.appendChild(tsNode)
+        vulnerability.appendChild(ts_node)
 
         ##
-        urlDetailNode = self.__xmlDoc.createElement("URLDetail")
-        vulnerability.appendChild(urlDetailNode)
+        url_detail_node = self.__xmlDoc.createElement("URLDetail")
+        vulnerability.appendChild(url_detail_node)
 
-        urlNode = self.__xmlDoc.createElement("URL")
-        urlNode.appendChild(self.__xmlDoc.createTextNode(request.url))
-        urlDetailNode.appendChild(urlNode)
+        url_node = self.__xmlDoc.createElement("URL")
+        url_node.appendChild(self.__xmlDoc.createTextNode(request.url))
+        url_detail_node.appendChild(url_node)
 
         if peer is not None:
-            peerNode = self.__xmlDoc.createElement("Peer")
+            peer_node = self.__xmlDoc.createElement("Peer")
             if isPeerAddrPort(peer):
-                addrNode = self.__xmlDoc.createElement("Addr")
-                addrNode.appendChild(self.__xmlDoc.createTextNode(peer[0]))
-                peerNode.appendChild(addrNode)
+                addr_node = self.__xmlDoc.createElement("Addr")
+                addr_node.appendChild(self.__xmlDoc.createTextNode(peer[0]))
+                peer_node.appendChild(addr_node)
 
                 portNode = self.__xmlDoc.createElement("Port")
                 portNode.appendChild(self.__xmlDoc.createTextNode(str(peer[1])))
-                peerNode.appendChild(portNode)
+                peer_node.appendChild(portNode)
             else:
-                addrNode = self.__xmlDoc.createElement("Addr")
-                addrNode.appendChild(self.__xmlDoc.createTextNode(str(peer)))
-                peerNode.appendChild(addrNode)
-            urlDetailNode.appendChild(peerNode)
+                addr_node = self.__xmlDoc.createElement("Addr")
+                addr_node.appendChild(self.__xmlDoc.createTextNode(str(peer)))
+                peer_node.appendChild(addr_node)
+            url_detail_node.appendChild(peer_node)
 
-        parameterNode = self.__xmlDoc.createElement("Parameter")
-        parameterNode.appendChild(self.__xmlDoc.createTextNode(parameter))
-        urlDetailNode.appendChild(parameterNode)
+        parameter_node = self.__xmlDoc.createElement("Parameter")
+        parameter_node.appendChild(self.__xmlDoc.createTextNode(parameter))
+        url_detail_node.appendChild(parameter_node)
 
         ##
 
-        infoNode = self.__xmlDoc.createElement("Info")
+        info_node = self.__xmlDoc.createElement("Info")
         info = info.replace("\n", "<br />")
-        infoNode.appendChild(self.__xmlDoc.createTextNode(info))
-        urlDetailNode.appendChild(infoNode)
+        info_node.appendChild(self.__xmlDoc.createTextNode(info))
+        url_detail_node.appendChild(info_node)
 
         self.__addToVulnerabilityList(category, vulnerability)
 
-    def generateReport(self, filename):
+    def generate_report(self, filename):
         """
         Create a xml file with a report of the vulnerabilities which have been logged with
         the method logVulnerability(category,level,url,parameter,info)
