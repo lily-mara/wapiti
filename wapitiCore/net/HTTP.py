@@ -527,6 +527,20 @@ class HTTP(object):
         self.configured = 0
 
     def send(self, target, headers=None,
+             get_params=None, post_params=None, file_params=None, retries=5):
+        """Send a HTTP Request. GET or POST (if post_params is set)."""
+
+        for i in range(retries):
+            try:
+                return self._send(target, headers, get_params, post_params,
+                                  file_params)
+            except requests.exceptions.ConnectionError:
+                print "Request %d of %d to %s failed. retrying" % (i, retries,
+                      target)
+                continue
+        raise requests.exceptions.ConnectionError()
+
+    def _send(self, target, headers=None,
              get_params=None, post_params=None, file_params=None):
         """Send a HTTP Request. GET or POST (if post_params is set)."""
         resp = None
