@@ -77,6 +77,7 @@ class jsoncookie(object):
         parent_domains = [".%s" % (".".join(exploded[x:])) for x in range(1, len(exploded) - 1)]
         matching_domains = [d for d in parent_domains if d in self.cookiedict]
         if not matching_domains:
+            print "Warning: no cookies from given file match target hostname"
             return cj
 
         for d in matching_domains:
